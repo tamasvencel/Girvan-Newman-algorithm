@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <queue>
+#include <cmath>
 
 using namespace std;
 
@@ -14,9 +16,15 @@ vector<pair<pair<int, int>, double>> flows;
 
 int n, m;
 
-void bfs(int start, vector<pair<int, int>> &bfsOrder);
+void bfs(int start);
+bool cmpFunc(const pair<pair<int, int>, double>& a, const pair<pair<int, int>, double>& b);
 
-int main(int args, char *argv[]) {
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        cerr << "Usage: " << argv[0] << " <filename> <starting_node>" << endl;
+        return 1;
+    }
+
     // store argv[1] in a string variable
     string filename = argv[1];
 
@@ -29,8 +37,6 @@ int main(int args, char *argv[]) {
 
     inputFile >> n >> m;
 
-    vector<pair<int, int>> bfsOrder(n, make_pair(0, 0));
-
     int x, y;
     for (int i = 0; i < m; ++i) {
         inputFile >> x >> y;
@@ -40,45 +46,61 @@ int main(int args, char *argv[]) {
         adjList[y][x] = 1;
     }
 
+    cout << "TEST: ";
+    double z = ((0.333333 + 1) / (double) 1) * 1;
+    double v = (2 / (double) 3 + 1) / (double) 2 * 1;
+    cout << v << endl;
+    cout << "\n";
+    cout << z << endl;
+    cout << "\n\n";
+
     int startingNode = atoi(argv[2]);
 
-    bfs(startingNode - 1, bfsOrder);
+    bfs(startingNode - 1);
 
     inputFile.close();
 
     return 0;
 }
 
-void bfs(int start, vector<pair<int, int>> &bfsOrder) {
-    vector<int> q(N);
-    q[0] = start;
+void bfs(int start) {
+    queue<int> q;
+    q.push(start);
     dist[start] = 0;
     numShortestPaths[start] = 1;  // There's one path to the starting node
-    int head = 0, rear = 0, k = 0;
-    while (head <= rear) {
-        int u = q[head];
-        cout << u + 1 << " ";
+    int k = 0;
 
-        bfsOrder[k].first = u;
-        bfsOrder[k].second = dist[u];
+    vector<pair<int, int>> levels(n, make_pair(0, 0));
+    vector<int> bfsOrder(n);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        levels[u].first = u;
+        levels[u].second = dist[u];
+        bfsOrder[k] = u;
 
         for (int j = 0; j < n; ++j) {
             if (adjList[u][j] == 1 && dist[j] == -1) {
                 dist[j] = dist[u] + 1;
                 numShortestPaths[j] = numShortestPaths[u];  // Increment the number of shortest paths
-                ++rear;
-                q[rear] = j;
+                q.push(j);
             } else if (adjList[u][j] == 1 && dist[j] == dist[u] + 1) {
                 numShortestPaths[j] += numShortestPaths[u];  // Accumulate paths
             }
         }
-        ++head;
         ++k;
     }
 
-    cout << "\n\nBfs Order:\n";
-    for (int i = 0; i < bfsOrder.size(); ++i) {
-        cout << bfsOrder[i].first + 1 << " " << bfsOrder[i].second << " \n";
+    cout << "\n\nLevels:\n";
+    for (pair<int, int> i: levels) {
+        cout << i.first + 1 << " - " << i.second << "\n";
+    }
+
+    cout << "\nBFS order:\n\n";
+    for (int i = 0; i < k; ++i) {
+        cout << bfsOrder[i] + 1 << " ";
     }
 
     cout << "\nNumber of shortest paths to each node from the starting node:\n";
@@ -86,13 +108,51 @@ void bfs(int start, vector<pair<int, int>> &bfsOrder) {
         cout << i + 1 << " -> " << start + 1 << ": " << numShortestPaths[i] << "\n";
     }
 
-    for (int i = bfsOrder.size() - 1; i >= 0; ++i) {
-        int level = bfsOrder[i].second;
-        int currentNode = bfsOrder[i].first;
-        int numOfCurrentNodeNeighbours = adjList[currentNode].size();
+    int e = 0;
+    for (int i = bfsOrder.size() - 1; i >= 0; --i) {
+        int level = levels[bfsOrder[i]].second;
+        int currentNode = bfsOrder[i];
+        double sumOfPreviousFlows = 0.0;
 
-//        for (neighbour : adjList[currentNode]) {
-//                flows[currentNode] += numShortestPaths[neighbour] / level;
-//        }
+        for (int neighbour = 0; neighbour < n; ++neighbour) {
+            int neighbourLevel1 = levels[neighbour].second;
+            if (adjList[currentNode][neighbour] == 1 && neighbourLevel1 > level) {
+                for (pair<pair<int, int>, double> &flow: flows) {
+                    if (flow.first.second == currentNode + 1) {
+                        sumOfPreviousFlows += flow.second;
+                    }
+                }
+            }
+        }
+
+        for (int neighbour = 0; neighbour < n; ++neighbour) {
+            int neighbourLevel2 = levels[neighbour].second;
+            if (adjList[currentNode][neighbour] == 1 && neighbourLevel2 < level) {
+                flows.push_back({{currentNode + 1, neighbour + 1}, 0.0}); // Initialize new edge in flows
+                flows[e].second +=
+                        ((sumOfPreviousFlows + 1) / (double)(numShortestPaths[currentNode])) *
+                        numShortestPaths[neighbour];
+                ++e;
+            }
+        }
     }
+
+
+    cout << "\n\nFlows:\n";
+    for (pair<pair<int, int>, double> flow: flows) {
+        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
+    }
+
+    sort(flows.begin(), flows.end(), cmpFunc);
+
+    cout << "\n\nFlows after sorting:\n";
+    for (pair<pair<int, int>, double> flow: flows) {
+        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
+    }
+
+    cout << "\nThe highest flow is on edge: (" << flows[flows.size()-1].first.first << "," << flows[flows.size()-1].first.second << "): " << flows[flows.size()-1].second << "\n";
+}
+
+bool cmpFunc(const pair<pair<int, int>, double>& a, const pair<pair<int, int>, double>& b) {
+    return a.second < b.second;
 }
