@@ -46,14 +46,6 @@ int main(int argc, char *argv[]) {
         adjList[y][x] = 1;
     }
 
-    cout << "TEST: ";
-    double z = ((0.333333 + 1) / (double) 1) * 1;
-    double v = (2 / (double) 3 + 1) / (double) 2 * 1;
-    cout << v << endl;
-    cout << "\n";
-    cout << z << endl;
-    cout << "\n\n";
-
     int startingNode = atoi(argv[2]);
 
     bfs(startingNode - 1);
