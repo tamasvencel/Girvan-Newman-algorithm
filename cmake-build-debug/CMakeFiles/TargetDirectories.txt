@@ -1,3 +1,3 @@
-D:/III. semester/Graph theory/Girvan-Newman algorithm/cmake-build-debug/CMakeFiles/lab1.dir
-D:/III. semester/Graph theory/Girvan-Newman algorithm/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/III. semester/Graph theory/Girvan-Newman algorithm/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Venci/Desktop/Girvan-Newman-algorithm/cmake-build-debug/CMakeFiles/lab1.dir
+C:/Users/Venci/Desktop/Girvan-Newman-algorithm/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Venci/Desktop/Girvan-Newman-algorithm/cmake-build-debug/CMakeFiles/rebuild_cache.dir

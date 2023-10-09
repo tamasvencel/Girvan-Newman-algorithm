@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "D:/III. semester/Graph theory/Girvan-Newman algorithm/cmake-build-debug",
-		"source" : "D:/III. semester/Graph theory/Girvan-Newman algorithm"
+		"build" : "C:/Users/Venci/Desktop/Girvan-Newman-algorithm/cmake-build-debug",
+		"source" : "C:/Users/Venci/Desktop/Girvan-Newman-algorithm"
 	},
 	"version" : 
 	{
