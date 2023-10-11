@@ -65,32 +65,36 @@ int main(int argc, char *argv[]) {
         cout << endl;
     }
 
-//    int startingNode = atoi(argv[2]);
-//
-//    bfs(startingNode - 1);
+    int startingNode = atoi(argv[2]);
+
+    bfs(startingNode - 1);
 
     for (int i = 0; i < flows.size(); ++i) {
-        finalFlows.push_back({{flows[i].first.first, flows[i].first.second}, 0.0});
+        finalFlows.push_back({{flows[i].first.first, flows[i].first.second}, flows[i].second});
     }
 
-    for (int i = 0; i < n; ++i) {
+    flows.clear();
+
+    for (int i = 1; i < n; ++i) {
         bfs(i);
 
         for (pair<pair<int, int>, double> flow: flows) {
-            for (pair<pair<int, int>, double> finalFlow: finalFlows) {
+            for (pair<pair<int, int>, double> &finalFlow: finalFlows) {
                 if (flow.first.first == finalFlow.first.first && flow.first.second == finalFlow.first.second) {
                     finalFlow.second += flow.second;
                 }
             }
         }
+
         flows.clear();
     }
 
     sort(finalFlows.begin(), finalFlows.end(), cmpFunc);
 
-    cout << "final flows:\n";
+    cout << "\nfinal flows:\n";
     for (pair<pair<int, int>, double> finalFlow: finalFlows) {
-        cout << "(" << finalFlow.first.first + 1 << "," << finalFlow.first.second + 1 << "): " << finalFlow.second << endl;
+        cout << "(" << finalFlow.first.first + 1 << "," << finalFlow.first.second + 1 << "): " << finalFlow.second
+             << endl;
     }
 
     inputFile.close();
