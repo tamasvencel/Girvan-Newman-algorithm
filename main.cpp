@@ -11,7 +11,7 @@ const int N = 100;
 
 vector<vector<int>> adjList(N, vector<int>(N, 0));
 vector<int> dist(N, -1);
-vector<int> numShortestPaths(N, 0);  // Number of shortest paths to each node
+vector<int> numShortestPaths(N, 0);
 vector<pair<pair<int, int>, double>> flows;
 vector<pair<pair<int, int>, double>> finalFlows;
 
@@ -83,18 +83,17 @@ void bfs(int start) {
     queue<int> q;
     q.push(start);
     dist[start] = 0;
-    numShortestPaths[start] = 1;  // There's one path to the starting node
+    numShortestPaths[start] = 1;
     int k = 0;
 
-    vector<pair<int, int>> levels(n, make_pair(0, 0));
+    vector<int> levels(n);
     vector<int> bfsOrder(n);
 
     while (!q.empty()) {
         int u = q.front();
         q.pop();
 
-        levels[u].first = u;
-        levels[u].second = dist[u];
+        levels[u] = dist[u];
         bfsOrder[k] = u;
 
         for (int j = 0; j < n; ++j) {
@@ -110,8 +109,8 @@ void bfs(int start) {
     }
 
     cout << "\n\nLevels:\n";
-    for (pair<int, int> i: levels) {
-        cout << i.first + 1 << " - " << i.second << "\n";
+    for (int i: levels) {
+        cout << i + 1 << " - " << i << "\n";
     }
 
     cout << "\nBFS order:\n\n";
@@ -126,13 +125,12 @@ void bfs(int start) {
 
     int e = 0;
     for (int i = bfsOrder.size() - 1; i >= 0; --i) {
-        int level = levels[bfsOrder[i]].second;
+        int level = levels[bfsOrder[i]];
         int currentNode = bfsOrder[i];
         double sumOfPreviousFlows = 0.0;
 
-        for (int neighbour = 0; neighbour < n; ++neighbour) {
-            int neighbourLevel1 = levels[neighbour].second;
-            if (adjList[currentNode][neighbour] == 1 && neighbourLevel1 > level) {
+        for (int neighbour = 0; neighbour < adjList[currentNode].size(); ++neighbour) {
+            if (adjList[currentNode][neighbour] == 1 && levels[neighbour] > level) {
                 for (pair<pair<int, int>, double> &flow: flows) {
                     if (flow.first.second == currentNode + 1) {
                         sumOfPreviousFlows += flow.second;
@@ -141,13 +139,17 @@ void bfs(int start) {
             }
         }
 
-        for (int neighbour = 0; neighbour < n; ++neighbour) {
-            int neighbourLevel2 = levels[neighbour].second;
-            if (adjList[currentNode][neighbour] == 1 && neighbourLevel2 < level) {
+        for (int neighbour = 0; neighbour < adjList[currentNode].size(); ++neighbour) {
+            if (adjList[currentNode][neighbour] == 1 && levels[neighbour] < level) {
                 flows.push_back({{currentNode + 1, neighbour + 1}, 0.0}); // Initialize new edge in flows
+<<<<<<< HEAD
                 flows[e].second +=
                         ((sumOfPreviousFlows + 1) / (double) (numShortestPaths[currentNode])) *
                         numShortestPaths[neighbour];
+=======
+                flows[e].second += (((sumOfPreviousFlows + 1) / (double)(numShortestPaths[currentNode])) *
+                                          numShortestPaths[neighbour]);
+>>>>>>> ec9e8700698bb23fb8c5dec71bb5507ff2896dfb
                 ++e;
             }
         }
