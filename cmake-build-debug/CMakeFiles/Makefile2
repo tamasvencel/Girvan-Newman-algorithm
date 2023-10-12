@@ -44,19 +44,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = "D:\CLion\CLion 2022.2.3\bin\cmake\win\bin\cmake.exe"
+CMAKE_COMMAND = "D:\I. semester\CLion\CLion 2022.2.3\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = "D:\CLion\CLion 2022.2.3\bin\cmake\win\bin\cmake.exe" -E rm -f
+RM = "D:\I. semester\CLion\CLion 2022.2.3\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\Venci\Desktop\Girvan-Newman-algorithm
+CMAKE_SOURCE_DIR = "D:\III. semester\Graph theory\Girvan-Newman-algorithm"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\Venci\Desktop\Girvan-Newman-algorithm\cmake-build-debug
+CMAKE_BINARY_DIR = "D:\III. semester\Graph theory\Girvan-Newman-algorithm\cmake-build-debug"
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -80,14 +80,14 @@ clean: CMakeFiles/lab1.dir/clean
 CMakeFiles/lab1.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\lab1.dir\build.make CMakeFiles/lab1.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\lab1.dir\build.make CMakeFiles/lab1.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\Venci\Desktop\Girvan-Newman-algorithm\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target lab1"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir="D:\III. semester\Graph theory\Girvan-Newman-algorithm\cmake-build-debug\CMakeFiles" --progress-num=1,2 "Built target lab1"
 .PHONY : CMakeFiles/lab1.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/lab1.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Venci\Desktop\Girvan-Newman-algorithm\cmake-build-debug\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start "D:\III. semester\Graph theory\Girvan-Newman-algorithm\cmake-build-debug\CMakeFiles" 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/lab1.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\Venci\Desktop\Girvan-Newman-algorithm\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "D:\III. semester\Graph theory\Girvan-Newman-algorithm\cmake-build-debug\CMakeFiles" 0
 .PHONY : CMakeFiles/lab1.dir/rule
 
 # Convenience name for target.

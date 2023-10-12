@@ -9,12 +9,12 @@ using namespace std;
 
 const int N = 100;
 
-vector<vector<int>> adjMatrix(N, vector<int>(N, 0));
+vector<vector<double>> adjMatrix(N, vector<double>(N, 0));
 vector<vector<int>> adjacencyList(N);
+vector<vector<double>> adjacencyMatrix(N, vector<double>(N, 0));
 vector<int> dist(N, -1);
 vector<int> numShortestPaths(N, 0);
 vector<pair<pair<int, int>, double>> flows;
-vector<pair<pair<int, int>, double>> finalFlows;
 
 int n, m;
 
@@ -65,36 +65,27 @@ int main(int argc, char *argv[]) {
         cout << endl;
     }
 
-    int startingNode = atoi(argv[2]);
+//    int startingNode = atoi(argv[2]);
 
-    bfs(startingNode - 1);
+//    bfs(startingNode - 1);
 
-    for (int i = 0; i < flows.size(); ++i) {
-        finalFlows.push_back({{flows[i].first.first, flows[i].first.second}, flows[i].second});
-    }
+    for (int i = 0; i < n; ++i) {
+        bfs(i); // Perform subsequent BFS iterations
 
-    flows.clear();
-
-    for (int i = 1; i < n; ++i) {
-        bfs(i);
-
-        for (pair<pair<int, int>, double> flow: flows) {
-            for (pair<pair<int, int>, double> &finalFlow: finalFlows) {
-                if (flow.first.first == finalFlow.first.first && flow.first.second == finalFlow.first.second) {
-                    finalFlow.second += flow.second;
-                }
-            }
+        for (pair<pair<int, int>, double> &flow: flows) {
+                adjacencyMatrix[flow.first.first - 1][flow.first.second - 1] += flow.second;
         }
 
         flows.clear();
     }
 
-    sort(finalFlows.begin(), finalFlows.end(), cmpFunc);
-
-    cout << "\nfinal flows:\n";
-    for (pair<pair<int, int>, double> finalFlow: finalFlows) {
-        cout << "(" << finalFlow.first.first + 1 << "," << finalFlow.first.second + 1 << "): " << finalFlow.second
-             << endl;
+    // print adjacency matrix
+    cout << "\nFinal flow matrix:" << endl;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cout << adjacencyMatrix[i][j] << " ";
+        }
+        cout << endl;
     }
 
     inputFile.close();
@@ -168,21 +159,23 @@ void bfs(int start) {
         }
     }
 
-
 //    cout << "\nFlows:\n";
 //    for (pair<pair<int, int>, double> flow: flows) {
 //        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
 //    }
-//
-//    sort(flows.begin(), flows.end(), cmpFunc);
-//
-//    cout << "\nFlows after sorting:\n";
-//    for (pair<pair<int, int>, double> flow: flows) {
-//        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
-//    }
-//
-//    cout << "\nThe highest flow is on edge: (" << flows[flows.size() - 1].first.first << ","
-//         << flows[flows.size() - 1].first.second << "): " << flows[flows.size() - 1].second << "\n";
+
+    sort(flows.begin(), flows.end(), cmpFunc);
+
+    cout << "\nFlows after sorting:\n";
+    for (pair<pair<int, int>, double> flow: flows) {
+        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
+    }
+
+    cout << "\nThe highest flow is on edge: (" << flows[flows.size() - 1].first.first << ","
+         << flows[flows.size() - 1].first.second << "): " << flows[flows.size() - 1].second << "\n";
+
+    levels.clear();
+    bfsOrder.clear();
 }
 
 bool cmpFunc(const pair<pair<int, int>, double> &a, const pair<pair<int, int>, double> &b) {
