@@ -13,8 +13,8 @@ bool cmpFunc(const pair<pair<int, int>, double> &a, const pair<pair<int, int>, d
 void addFlowsToFinalFlows(vector<pair<pair<int, int>, double>> &flows, vector<pair<pair<int, int>, double>> &finalFlows);
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        cerr << "Usage: " << argv[0] << " <filename> <starting_node>" << endl;
+    if (argc < 2) {
+        cerr << "Usage: " << argv[0] << " <filename>" << endl;
         return 1;
     }
 
