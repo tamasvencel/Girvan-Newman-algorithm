@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
                                                       maxFlow->first.first));
 
         cout << endl << "edge (" << maxFlow->first.first + 1 << "," << maxFlow->first.second + 1 << "): "
-             << maxFlow->second << " has been deleted!" << endl;
+             << maxFlow->second << " - has been deleted!" << endl;
 
         finalFlows.clear();
     }
