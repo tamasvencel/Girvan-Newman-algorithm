@@ -7,20 +7,10 @@
 
 using namespace std;
 
-const int N = 100;
-
-vector<vector<double>> adjMatrix(N, vector<double>(N, 0));
-vector<vector<int>> adjacencyList(N);
-vector<vector<double>> adjacencyMatrix(N, vector<double>(N, 0));
-vector<int> dist(N, -1);
-vector<int> numShortestPaths(N, 0);
-vector<pair<pair<int, int>, double>> flows;
-
-int n, m;
-
-void bfs(int start);
-
+void bfs(int start, int &n, int &m, vector<vector<int>> &adjacencyList, vector<pair<pair<int, int>, double>> &flows);
+void printAdjList(const vector<vector<int>> &adjacencyList, const int &n, const int &m);
 bool cmpFunc(const pair<pair<int, int>, double> &a, const pair<pair<int, int>, double> &b);
+void addFlowsToFinalFlows(vector<pair<pair<int, int>, double>> &flows, vector<pair<pair<int, int>, double>> &finalFlows);
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -28,98 +18,110 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // store argv[1] in a string variable
+    // "input.txt"
     string filename = argv[1];
 
     ifstream inputFile(filename);
 
     if (!inputFile.is_open()) {
-        cerr << "Could not open the file " << filename << endl;
+        cerr << "Couldn't open the file " << filename << endl;
         return 1;
     }
 
+    int n, m;
     inputFile >> n >> m;
 
-    int x, y;
+    vector<vector<int>> adjacencyList(n);
+    vector<pair<pair<int, int>, double>> flows;
+    vector<pair<pair<int, int>, double>> finalFlows;
+    vector<pair<int, int>> edgeList;
+
+    int start, end;
     for (int i = 0; i < m; ++i) {
-        inputFile >> x >> y;
-        --x;
-        --y;
+        inputFile >> start >> end;
+        --start;
+        --end;
 
-        adjMatrix[x][y] = 1;
-        adjMatrix[y][x] = 1;
+        adjacencyList[start].push_back(end);
+        adjacencyList[end].push_back(start);
 
-        adjacencyList[x].push_back(y);
-        adjacencyList[y].push_back(x);
+        finalFlows.push_back({{start, end}, 0});
+
+        edgeList.emplace_back(start,end);
     }
 
-    cout << "Adjacency List:" << endl;
-    for (int i = 0; i < n; ++i) {
-        cout << i + 1 << ": ";
-        for (int j = 0; j < adjacencyList[i].size(); ++j) {
-            cout << adjacencyList[i][j] + 1; // Adding 1 to convert from 0-based to 1-based indexing
-            if (j < adjacencyList[i].size() - 1) {
-                cout << ", ";
-            }
-        }
-        cout << endl;
-    }
+    printAdjList(adjacencyList, n, m);
 
 //    int startingNode = atoi(argv[2]);
-
 //    bfs(startingNode - 1);
 
-    for (int i = 0; i < n; ++i) {
-        bfs(i); // Perform subsequent BFS iterations
-
-        for (pair<pair<int, int>, double> &flow: flows) {
-                adjacencyMatrix[flow.first.first - 1][flow.first.second - 1] += flow.second;
+    while (!edgeList.empty()) {
+        for (int i = 0; i < n; ++i) {
+            bfs(i, n, m, adjacencyList, flows);
+            addFlowsToFinalFlows(flows, finalFlows);
+            flows.clear();
         }
 
-        flows.clear();
+        // print finalFlows
+        cout << "\nFinal flows:\n";
+        for (auto &finalFlow: finalFlows) {
+            cout << "(" << finalFlow.first.first + 1 << "," << finalFlow.first.second + 1 << "): " << finalFlow.second << endl;
+        }
+
+        auto maxFlow = max_element(finalFlows.begin(), finalFlows.end(), cmpFunc);
+
+        edgeList.erase(find(edgeList.begin(), edgeList.end(), maxFlow->first));
+
+        adjacencyList[maxFlow->first.first].erase(find(adjacencyList[maxFlow->first.first].begin(),
+                                                     adjacencyList[maxFlow->first.first].end(),
+                                                     maxFlow->first.second));
+        adjacencyList[maxFlow->first.second].erase(find(adjacencyList[maxFlow->first.second].begin(),
+                                                      adjacencyList[maxFlow->first.second].end(),
+                                                      maxFlow->first.first));
+
+        cout << endl << "edge (" << maxFlow->first.first + 1 << "," << maxFlow->first.second + 1 << "): "
+             << maxFlow->second << " has been deleted!" << endl;
+
+        finalFlows.clear();
     }
 
-    // print adjacency matrix
-    cout << "\nFinal flow matrix:" << endl;
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            cout << adjacencyMatrix[i][j] << " ";
-        }
-        cout << endl;
+    if (edgeList.empty()) {
+        cout << "\nAll the edges have been successfully deleted!" << endl;
     }
+    printAdjList(adjacencyList, n, m);
 
     inputFile.close();
-
     return 0;
 }
 
-void bfs(int start) {
+void bfs(int start, int &n, int &m, vector<vector<int>> &adjacencyList, vector<pair<pair<int, int>, double>> &flows) {
+    vector<int> dist(n, -1);
+    vector<int> numShortestPaths(n, 0);
+    vector<int> levels(n);
+    vector<int> bfsOrder;
+
     queue<int> q;
+
     q.push(start);
     dist[start] = 0;
     numShortestPaths[start] = 1;
-    int k = 0;
-
-    vector<int> levels(n);
-    vector<int> bfsOrder(n);
 
     while (!q.empty()) {
-        int u = q.front();
+        int current = q.front();
         q.pop();
 
-        levels[u] = dist[u];
-        bfsOrder[k] = u;
+        levels[current] = dist[current];
+        bfsOrder.push_back(current);
 
-        for (int j = 0; j < n; ++j) {
-            if (adjMatrix[u][j] == 1 && dist[j] == -1) {
-                dist[j] = dist[u] + 1;
-                numShortestPaths[j] = numShortestPaths[u];  // Increment the number of shortest paths
-                q.push(j);
-            } else if (adjMatrix[u][j] == 1 && dist[j] == dist[u] + 1) {
-                numShortestPaths[j] += numShortestPaths[u];  // Accumulate paths
+        for (auto &neighbour : adjacencyList[current]) {
+            if (dist[neighbour] == -1) {
+                dist[neighbour] = dist[current] + 1;
+                numShortestPaths[neighbour] = numShortestPaths[current];  // Increment the number of shortest paths
+                q.push(neighbour);
+            } else if (dist[neighbour] == dist[current] + 1) {
+                numShortestPaths[neighbour] += numShortestPaths[current];  // Accumulate paths
             }
         }
-        ++k;
     }
 
 //    cout << "\nLevels:\n";
@@ -128,7 +130,7 @@ void bfs(int start) {
 //    }
 //
 //    cout << "\nBFS order:\n";
-//    for (int i = 0; i < k; ++i) {
+//    for (int i = 0; i < bfsOrder.size() - 1; ++i) {
 //        cout << bfsOrder[i] + 1 << " ";
 //    }
 //
@@ -139,19 +141,19 @@ void bfs(int start) {
 
     int e = 0;
     for (int i = bfsOrder.size() - 1; i >= 0; --i) {
-        int level = levels[bfsOrder[i]];
+        int levelOfCurrentNode = levels[bfsOrder[i]];
         int currentNode = bfsOrder[i];
         double sumOfPreviousFlows = 0.0;
 
         for (pair<pair<int, int>, double> &flow: flows) {
-            if (flow.first.second == currentNode + 1) {
+            if (flow.first.second == currentNode) {
                 sumOfPreviousFlows += flow.second;
             }
         }
 
         for (auto &neighbour: adjacencyList[currentNode]) {
-            if (levels[neighbour] < level) {
-                flows.push_back({{currentNode + 1, neighbour + 1}, 0.0}); // Initialize new edge in flows
+            if (levels[neighbour] < levelOfCurrentNode) {
+                flows.push_back({{currentNode, neighbour}, 0.0}); // Initialize new edge in flows
                 flows[e].second += (((sumOfPreviousFlows + 1) / (double) (numShortestPaths[currentNode])) *
                                     numShortestPaths[neighbour]);
                 ++e;
@@ -163,21 +165,48 @@ void bfs(int start) {
 //    for (pair<pair<int, int>, double> flow: flows) {
 //        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
 //    }
+//
+//    sort(flows.begin(), flows.end(), cmpFunc);
+//
+//    cout << "\nFlows after sorting:\n";
+//    for (pair<pair<int, int>, double> flow: flows) {
+//        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
+//    }
+//
+//    cout << "\nThe highest flow is on edge: (" << flows[flows.size() - 1].first.first << ","
+//         << flows[flows.size() - 1].first.second << "): " << flows[flows.size() - 1].second << "\n";
+}
 
-    sort(flows.begin(), flows.end(), cmpFunc);
-
-    cout << "\nFlows after sorting:\n";
-    for (pair<pair<int, int>, double> flow: flows) {
-        cout << "(" << flow.first.first << "," << flow.first.second << "): " << flow.second << "\n";
+void printAdjList(const vector<vector<int>> &adjacencyList, const int &n, const int &m) {
+    cout << "Adjacency List:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cout << i + 1 << ": ";
+        for (int j = 0; j < adjacencyList[i].size(); ++j) {
+            cout << adjacencyList[i][j] + 1; // Adding 1 to convert from 0-based to 1-based indexing
+            if (j < adjacencyList[i].size() - 1) {
+                cout << ", ";
+            }
+        }
+        cout << endl;
     }
-
-    cout << "\nThe highest flow is on edge: (" << flows[flows.size() - 1].first.first << ","
-         << flows[flows.size() - 1].first.second << "): " << flows[flows.size() - 1].second << "\n";
-
-    levels.clear();
-    bfsOrder.clear();
 }
 
 bool cmpFunc(const pair<pair<int, int>, double> &a, const pair<pair<int, int>, double> &b) {
     return a.second < b.second;
+}
+
+void addFlowsToFinalFlows(vector<pair<pair<int, int>, double>> &flows, vector<pair<pair<int, int>, double>> &finalFlows) {
+    for (auto &flow : flows) {
+        bool found = false;
+        for (auto &finalFlow : finalFlows) {
+            if (finalFlow.first == flow.first || finalFlow.first == make_pair(flow.first.second, flow.first.first)) {
+                finalFlow.second += flow.second;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            finalFlows.push_back(flow);
+        }
+    }
 }
