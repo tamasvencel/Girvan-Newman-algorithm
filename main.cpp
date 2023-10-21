@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // "input.txt"
     string filename = argv[1];
 
     ifstream inputFile(filename);
@@ -63,24 +62,30 @@ int main(int argc, char *argv[]) {
         }
 
         // print finalFlows
-        cout << "\nFinal flows:\n";
-        for (auto &finalFlow: finalFlows) {
-            cout << "(" << finalFlow.first.first + 1 << "," << finalFlow.first.second + 1 << "): " << finalFlow.second << endl;
-        }
+//        cout << "\nFinal flows:\n";
+//        for (auto &finalFlow: finalFlows) {
+//            cout << "(" << finalFlow.first.first + 1 << "," << finalFlow.first.second + 1 << "): " << finalFlow.second << endl;
+//        }
 
         auto maxFlow = max_element(finalFlows.begin(), finalFlows.end(), cmpFunc);
+        auto max = maxFlow->second;
 
-        edgeList.erase(find(edgeList.begin(), edgeList.end(), maxFlow->first));
+        for (auto &flow: finalFlows) {
+            if (flow.second == max) {
+                edgeList.erase(find(edgeList.begin(), edgeList.end(), flow.first));
 
-        adjacencyList[maxFlow->first.first].erase(find(adjacencyList[maxFlow->first.first].begin(),
-                                                     adjacencyList[maxFlow->first.first].end(),
-                                                     maxFlow->first.second));
-        adjacencyList[maxFlow->first.second].erase(find(adjacencyList[maxFlow->first.second].begin(),
-                                                      adjacencyList[maxFlow->first.second].end(),
-                                                      maxFlow->first.first));
+                adjacencyList[flow.first.first].erase(find(adjacencyList[flow.first.first].begin(),
+                                                               adjacencyList[flow.first.first].end(),
+                                                               flow.first.second));
+                adjacencyList[flow.first.second].erase(find(adjacencyList[flow.first.second].begin(),
+                                                                adjacencyList[flow.first.second].end(),
+                                                                flow.first.first));
 
-        cout << endl << "edge (" << maxFlow->first.first + 1 << "," << maxFlow->first.second + 1 << "): "
-             << maxFlow->second << " - has been deleted!" << endl;
+                cout << endl << "edge (" << flow.first.first + 1 << "," << flow.first.second + 1 << "): "
+                     << flow.second << " - has been deleted!";
+            }
+        }
+        cout << "\n---------------------------------------" << endl;
 
         finalFlows.clear();
     }
@@ -88,7 +93,7 @@ int main(int argc, char *argv[]) {
     if (edgeList.empty()) {
         cout << "\nAll the edges have been successfully deleted!" << endl;
     }
-    printAdjList(adjacencyList, n, m);
+//    printAdjList(adjacencyList, n, m);
 
     inputFile.close();
     return 0;
